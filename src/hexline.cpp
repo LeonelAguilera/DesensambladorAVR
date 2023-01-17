@@ -1,4 +1,5 @@
 #include "hexline.h"
+#include "dataLinkedList.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,8 +9,9 @@ HexLine::HexLine(FILE* fp) {
 			this->byteCount = 0;
 			this->address = 0;
 			this->recordType = 0;
-			this->data = 0;
+			this->dataHead = 0;
 			this->checksum = 0;
+			this->nextLine = 0;
 			return;
 		}
 	}
@@ -20,25 +22,55 @@ HexLine::HexLine(FILE* fp) {
 	this->address = hexToWord(buffer);
 	fgets(buffer, 3, fp);
 	this->recordType = hexToByte(buffer);
-	this->data = new word[this->byteCount / 2];
-	for (uint8_t i = 0; i < this->byteCount/2; i++) {
+
+	DataLinkedList* temp = &this->dataHead;
+	if (this->byteCount / 2 > 0) {
 		fgets(buffer, 5, fp);
-		this->data[i] = hexToWord(buffer);
+		temp->data = hexToWord(buffer);
+		for (uint8_t i = 1; i < this->byteCount / 2; i++) {
+			fgets(buffer, 5, fp);
+			temp->next = new DataLinkedList(hexToWord(buffer));
+			temp = temp->next;
+		}
 	}
 	fgets(buffer, 3, fp);
 	this->checksum = hexToByte(buffer);
+	this->nextLine = 0;
+}
+
+byte HexLine::getByteCount() {
+	return this->byteCount;
+}
+word HexLine::getAddress() {
+	return this->address;
+}
+byte HexLine::getRecordType() {
+	return this->recordType;
+}
+DataLinkedList HexLine::getDataHead() {
+	return this->dataHead;
+}
+byte HexLine::getChecksum() {
+	return this->checksum;
 }
 
 void HexLine::printData() {
+	DataLinkedList temp = this->dataHead;
 	for (uint8_t i = 0; i < this->byteCount / 2; i++) {
-		printf("0x%04X\n", this->data[i]);
+		printf("0x%04X\n", temp.data);
+		if (temp.next != 0) {
+			temp = temp.getNext();
+		}
 	}
 }
 
+bool HexLine::isEOF() {
+	return this->recordType == 0x01;
+}
 
-
-
-
+HexLine::~HexLine() {
+	//TODO
+}
 
 
 byte hexToByte(const char* hexStr) {
