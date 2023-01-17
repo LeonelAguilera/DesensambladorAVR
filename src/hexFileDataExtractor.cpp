@@ -4,18 +4,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-HexFileDataExtractor::HexFileDataExtractor(FILE* fp) {
+DataLinkedList getDataFromHex(FILE* fp) {
 	HexLine temp_line = HexLine(fp);
-	this->instructionsHead = DataLinkedList(temp_line.getDataHead());
-	DataLinkedList temp_data = this->instructionsHead;
+	DataLinkedList instructionsHead = DataLinkedList(temp_line.getDataHead());
+	DataLinkedList* temp_data = &instructionsHead;
 
 	while (temp_line.isEOF() == false) {
-		while (temp_data.next != 0) {
-			printf("0x%04X\n", temp_data.data);
-			temp_data = temp_data.getNext();
+		while (temp_data->next != 0) {
+			//printf("0x%04X\n", temp_data->data);
+			temp_data = temp_data->next;
 		}
 		temp_line = HexLine(fp);
-		temp_data.next = new DataLinkedList(temp_line.getDataHead());
+		temp_data->next = new DataLinkedList(temp_line.getDataHead());
 	}
-	printf("0x%04X\n", temp_data.data);
+	//printf("0x%04X\n", temp_data->data);
+	return instructionsHead;
 }

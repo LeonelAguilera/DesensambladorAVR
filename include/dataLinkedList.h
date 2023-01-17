@@ -26,6 +26,13 @@ public:
 		}
 	};
 	DataLinkedList getNext() { return *this->next; };
+
+	void print() {
+		printf("0x%04X\n", this->data);
+		if (this->next != 0) {
+			this->next->print();
+		}
+	}
 };
 
 

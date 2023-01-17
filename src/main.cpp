@@ -16,10 +16,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "hexline.h"
 #include "hexFileDataExtractor.h"
-
-//void fileReadTest();
+#include "dataLinkedList.h"
 
 int main() {
 	FILE* fp;
@@ -30,9 +28,9 @@ int main() {
 		return 0;
 	}
 
+	DataLinkedList my_data = getDataFromHex(fp);
 
-	HexFileDataExtractor hexfiledataextractor = HexFileDataExtractor(fp);
-
+	my_data.print();
 
 	fclose(fp);
 	return 0;

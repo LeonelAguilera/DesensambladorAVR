@@ -6,11 +6,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-class HexFileDataExtractor {
-public:
-	DataLinkedList instructionsHead;
-public:
-	HexFileDataExtractor(FILE* fp);
-};
+DataLinkedList getDataFromHex(FILE* fp);
 
 #endif // !__HexFileDataExtractor_H__
