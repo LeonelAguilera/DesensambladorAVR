@@ -1,4 +1,45 @@
 #include "hexline.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+HexLine::HexLine(FILE* fp) {
+	while (fgetc(fp) != ':') {
+		if (feof(fp)) {
+			this->byteCount = 0;
+			this->address = 0;
+			this->recordType = 0;
+			this->data = 0;
+			this->checksum = 0;
+			return;
+		}
+	}
+	char buffer[5]{};
+	fgets(buffer, 3, fp);
+	this->byteCount = hexToByte(buffer);
+	fgets(buffer, 5, fp);
+	this->address = hexToWord(buffer);
+	fgets(buffer, 3, fp);
+	this->recordType = hexToByte(buffer);
+	this->data = new word[this->byteCount / 2];
+	for (uint8_t i = 0; i < this->byteCount/2; i++) {
+		fgets(buffer, 5, fp);
+		this->data[i] = hexToWord(buffer);
+	}
+	fgets(buffer, 3, fp);
+	this->checksum = hexToByte(buffer);
+}
+
+void HexLine::printData() {
+	for (uint8_t i = 0; i < this->byteCount / 2; i++) {
+		printf("0x%04X\n", this->data[i]);
+	}
+}
+
+
+
+
+
+
 
 byte hexToByte(const char* hexStr) {
 	if (hexStr[2] != '\0') {
@@ -97,6 +138,7 @@ bool hexToByte_UnitTest() {
 			return false;
 		}
 	}
+	return true;
 }
 
 bool hexToWord_UnitTest() {
@@ -112,6 +154,19 @@ bool hexToWord_UnitTest() {
 	for (uint8_t i = 0; i < 5; i++) {
 		if (hexToWord(test_values[i]) != test_answers[i]) {
 			return false;
+		}
+	}
+	return true;
+}
+
+void run_unit_tests() {
+	bool (*unit_tests[3])(void) = {singleHexCharToBin_UnitTest, hexToByte_UnitTest, hexToWord_UnitTest};
+	for (int i = 0; i < 3; i++) {
+		if (unit_tests[i]()) {
+			printf("Unit test %d: Passed\n", i);
+		}
+		else {
+			printf("Unit test %d: Failed\n", i);
 		}
 	}
 }

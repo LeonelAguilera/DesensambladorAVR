@@ -21,29 +21,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 //void fileReadTest();
 
 int main() {
-	if (singleHexCharToBin_UnitTest()) {
-		printf("singleHexCharToBin_UnitTest: Passed\n");
-	}
-	else {
-		printf("singleHexCharToBin_UnitTest: Error\n");
-	}
-	if (hexToByte_UnitTest()) {
-		printf("hexToByte_UnitTest: Passed\n");
-	}
-	else {
-		printf("hexToByte_UnitTest: Error\n");
-	}
-	if (hexToWord_UnitTest()) {
-		printf("hexToWord_UnitTest: Passed\n");
-	}
-	else {
-		printf("hexToWord_UnitTest: Error\n");
-	}
-	return 0;
-}
-
-/*
-void fileReadTest() {
 	FILE* fp;
 
 	fopen_s(&fp, "code.hex", "r");
@@ -51,10 +28,12 @@ void fileReadTest() {
 		perror("File opening failed");
 		return 0;
 	}
-	char str[50]{};
-	while (fgets(str, 10, fp) != NULL) {
-		printf("%s", str);
-	}
+
+
+	HexLine hexline = HexLine(fp);
+	hexline.printData();
+
 
 	fclose(fp);
-}*/
+	return 0;
+}
