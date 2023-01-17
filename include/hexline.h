@@ -18,4 +18,8 @@ public:
 byte hexToByte(const char* hexStr);
 word hexToWord(const char* hexStr);
 byte singleHexCharToBin(const char hexChar);
+
+bool singleHexCharToBin_UnitTest();
+bool hexToByte_UnitTest();
+bool hexToWord_UnitTest();
 #endif // !__HEXLINE_H__

@@ -82,7 +82,7 @@ bool singleHexCharToBin_UnitTest() {
 	return true;
 }
 
-bool hexToByte_UnitTest(const char* hexStr) {
+bool hexToByte_UnitTest() {
 	const char test_values[5][3] = {
 		{'0','C','\0'},
 		{'1','0','\0'},
@@ -99,7 +99,7 @@ bool hexToByte_UnitTest(const char* hexStr) {
 	}
 }
 
-bool hexToWord_UnitTest(const char* hexStr) {
+bool hexToWord_UnitTest() {
 	const char test_values[5][5] = {
 		{'0', 'C', '9', '4', '\0'},
 		{'3', '4', '0', '0', '\0'},
@@ -110,7 +110,7 @@ bool hexToWord_UnitTest(const char* hexStr) {
 	const word test_answers[5] = { 0x940C, 0x0034, 0xB98B, 0xFFFF, 0xE000 };
 
 	for (uint8_t i = 0; i < 5; i++) {
-		if (hexToByte(test_values[i]) != test_answers[i]) {
+		if (hexToWord(test_values[i]) != test_answers[i]) {
 			return false;
 		}
 	}

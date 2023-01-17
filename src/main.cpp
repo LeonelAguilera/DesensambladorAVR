@@ -16,11 +16,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "hexline.h"
 
 //void fileReadTest();
 
 int main() {
-
+	if (singleHexCharToBin_UnitTest()) {
+		printf("singleHexCharToBin_UnitTest: Passed\n");
+	}
+	else {
+		printf("singleHexCharToBin_UnitTest: Error\n");
+	}
+	if (hexToByte_UnitTest()) {
+		printf("hexToByte_UnitTest: Passed\n");
+	}
+	else {
+		printf("hexToByte_UnitTest: Error\n");
+	}
+	if (hexToWord_UnitTest()) {
+		printf("hexToWord_UnitTest: Passed\n");
+	}
+	else {
+		printf("hexToWord_UnitTest: Error\n");
+	}
 	return 0;
 }
 
