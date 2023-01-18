@@ -31,30 +31,55 @@ int main() {
 		return 0;
 	}
 
-	DataLinkedList instructionList = getDataFromHex(hexFile);
+	DataLinkedList hexCode = getDataFromHex(hexFile);
 
 	//instructionList.print();
 
 	fclose(hexFile);
 
+	/*
 	Instruction ADC = Instruction(0b0001110000000000, 0b1111110000000000, "ADC", 5);
 
 	char ASMCode[INSTRUCTION_MAX_LENGTH]{};
 	DataLinkedList test = DataLinkedList(0b0001110110001111);
 	ADC.codeLine(&test, ASMCode);
-	puts(ASMCode);
+	puts(ASMCode);*/
 
-	/*FILE* asmFile;
+	FILE* asmFile;
 
-	fopen_s(&hexFile, "code.hex", "w");
-	if (hexFile == 0) {
+	fopen_s(&asmFile, "asmFile.asm", "w");
+	if (asmFile == 0) {
 		perror("ASM file creation failed");
 		return 0;
 	}
 
-	fclose(asmFile);*/
+	Instruction* listaDeInstrucciones[NUM_INSTRUCCIONES];
+	inicializador(listaDeInstrucciones);
+	
+	while (hexCode.next != 0) {
+		char ASMCode[INSTRUCTION_MAX_LENGTH]{};
+		bool failedFlag = true;
+		for (int i = 0; i < NUM_INSTRUCCIONES; i++) {
+			if (listaDeInstrucciones[i]->codeLine(&hexCode, ASMCode)) {
+				puts(ASMCode);
+				failedFlag = false;
+				break;
+			}
+		}
+		if (failedFlag) {
+			perror("Instruccion no reconocida");
+		}
+	}
 
-	//delete ASMCode;
+	/*
+	void print() {
+		printf("0x%04X\n", this->data);
+		if (this->next != 0) {
+			this->next->print();
+		}
+	}*/
+
+	fclose(asmFile);
 
 	return 0;
 }

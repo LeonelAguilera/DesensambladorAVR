@@ -22,6 +22,7 @@ License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 #include "dataLinkedList.h"
 
 #define INSTRUCTION_MAX_LENGTH 50
+#define NUM_INSTRUCCIONES 144
 
 class Instruction {
 protected:
@@ -37,62 +38,90 @@ public:
 };
 
 class BranchInstruction :public Instruction {
+public:
+	BranchInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class InmediateWordInstruction :public Instruction {
+public:
+	InmediateWordInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class InmediateByteInstruction :public Instruction {
+public:
+	InmediateByteInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class SingleRegisterInstruction :public Instruction {
+public:
+	SingleRegisterInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class LoadInstruction :public Instruction {
+public:
+	LoadInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class StoreInstruction :public Instruction {
+public:
+	StoreInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class SREGInstruction :public Instruction {
+public:
+	SREGInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class NoParameterInstruction :public Instruction {
+public:
+	NoParameterInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class SingleBitInstruction :public Instruction {
+public:
+	SingleBitInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class DoubleSingleRegisterInstruction :public Instruction {
+public:
+	DoubleSingleRegisterInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool isThisInstruction(word OPcode);
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class FMULInstruction :public Instruction {
+public:
+	FMULInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class IOInstruction :public Instruction {
+public:
+	IOInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class ExtraInstruction :public Instruction {
+public:
+	ExtraInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class ThirtyTwoBitsInstruction :public Instruction {
+public:
+	ThirtyTwoBitsInstruction(word OPcode, word mask, const char* mnemonic, byte man) :Instruction(OPcode, mask, mnemonic, man) {};
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
 };
 
-void inicializador(Instruction* ListaDe123Instrucciones);
+void inicializador(Instruction** ListaDe144Instrucciones);
 
 #endif // !__INSTRUCTION_H__
