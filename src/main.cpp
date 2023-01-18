@@ -37,9 +37,9 @@ int main() {
 
 	fclose(hexFile);
 
-	Instruction ADC = Instruction(0b0001110000000000,0b1111110000000000,"ADC",5);
+	Instruction ADC = Instruction(0b0001110000000000, 0b1111110000000000, "ADC", 5);
 
-	char ASMCode[15]{};
+	char ASMCode[INSTRUCTION_MAX_LENGTH]{};
 	DataLinkedList test = DataLinkedList(0b0001110110001111);
 	ADC.codeLine(&test, ASMCode);
 	puts(ASMCode);
@@ -53,6 +53,8 @@ int main() {
 	}
 
 	fclose(asmFile);*/
+
+	//delete ASMCode;
 
 	return 0;
 }

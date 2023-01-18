@@ -17,6 +17,7 @@ License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "instruction.h"
+#include <malloc.h>
 
 bool Instruction::isThisInstruction(word OPcode) {
 	return (OPcode & this->_mask) == this->_OPcode;
@@ -24,19 +25,26 @@ bool Instruction::isThisInstruction(word OPcode) {
 
 bool Instruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte Rr = OPCode->data & 0x000F | (OPCode->data & 0x0200) >> 5;
 	byte Rd = (OPCode->data >> 4) & 0x001F;
 	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d,r%d", this->_mnemonic, Rd, Rr);
-	OPCode = OPCode->next;
+
+	if (OPCode->next != 0) {
+		DataLinkedList* temp = OPCode->next;
+		*OPCode = OPCode->getNext();
+		free(temp);
+	}
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool BranchInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data) || this->_man == 13 || this->_man == 14) {
-		return false;
+		return 0;
 	}
 
 	word k = OPCode->data & !this->_mask;
@@ -44,39 +52,52 @@ bool BranchInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		k = k >> 3;
 	}
 	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d", this->_mnemonic, k); //Pendiente controlar signos negativos
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool InmediateWordInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte K = OPCode->data & 0x000F | (OPCode->data & 0x00C0)>>2;
 	byte d = (OPCode->data & 0x0030) >> 4;
 	d = 24 + 2 * d;
 	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d:r%d,%d", this->_mnemonic, d+1,d,K); //Pendiente controlar signos negativos
-	OPCode = OPCode->next;
+
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool InmediateByteInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte K = OPCode->data & 0x000F | (OPCode->data & 0x0F00) >> 4;
 	byte d = (OPCode->data & 0x00F0) >> 4;
 	d += 16;
 	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d,%d", this->_mnemonic, d, K); //Pendiente controlar signos negativos
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool SingleRegisterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte d = (OPCode->data & 0x01F0) >> 4;
@@ -87,13 +108,17 @@ bool SingleRegisterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) 
 	else {
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d", this->_mnemonic, d);
 	}
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool LoadInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte d = (OPCode->data & 0x01F0) >> 4;
@@ -150,15 +175,19 @@ bool LoadInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, Z+", this->_mnemonic, d);
 		break;
 	default:
-		return false;
+		return 0;
 	}
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool StoreInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte d = (OPCode->data & 0x01F0) >> 4;
@@ -221,43 +250,59 @@ bool StoreInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s Z, r%d", this->_mnemonic, d);
 		break;
 	default:
-		return false;
+		return 0;
 	}
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool SREGInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte s = (OPCode->data >> 4) & 0x0007;
 	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s %d", this->_mnemonic, s);
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool NoParameterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s", this->_mnemonic);
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool SingleBitInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte A = (OPCode->data >> 3) & 0x001F;
 	byte b = (OPCode->data >> 0) & 0x0007;
 
 	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s %d, %d", this->_mnemonic, A, b);
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
@@ -268,31 +313,39 @@ bool DoubleSingleRegisterInstruction::isThisInstruction(word OPcode) {
 
 bool DoubleSingleRegisterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte d = (OPCode->data >> 0) & 0x001F;
 	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s %d", this->_mnemonic, d);
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool FMULInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte d = (OPCode->data >> 4) & 0x0007;
 	byte r = (OPCode->data >> 0) & 0x0007;
 
 	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, r%d", this->_mnemonic, d, r);
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool IOInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte A = (OPCode->data & 0x0600) >> 5 | (OPCode->data & 0x000F);
@@ -304,13 +357,17 @@ bool IOInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	else {
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, %d", this->_mnemonic, dr, A);
 	}
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool ExtraInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte d = (OPCode->data >> 4) & 0x000F;
@@ -333,23 +390,31 @@ bool ExtraInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s %d, r%d", this->_mnemonic, k, d + 16);
 		break;
 	default:
-		return false;
+		return 0;
 		break;
 	}
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 
 bool ThirtyTwoBitsInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return false;
+		return 0;
 	}
 
 	byte k = ((OPCode->data >> 0) & 0x000F) | ((OPCode->data >> 4) & 0x0070);
 
 	if (this->_mask & 0x0001) {
 		byte d = (OPCode->data >> 4) & 0x001F;
-		OPCode = OPCode->next;
+		DataLinkedList* temp = OPCode->next;
+		*OPCode = OPCode->getNext();
+		free(temp);
+
+		//OPCode = OPCode->next;
 		word k = OPCode->data;
 		if (this->_OPcode & 0x0200) { //STS
 			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s %d, r%d", this->_mnemonic, k, d);
@@ -361,13 +426,21 @@ bool ThirtyTwoBitsInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	else {
 		uint32_t k = (OPCode->data & 0x0001) | ((OPCode->data & 0x01F0) >> 3);
 		k = k << 16;
-		OPCode = OPCode->next;
+		DataLinkedList* temp = OPCode->next;
+		*OPCode = OPCode->getNext();
+		free(temp);
+
+		//OPCode = OPCode->next;
 		k |= OPCode->data;
 
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s 0x%06X", this->_mnemonic, k);
 	}
 
-	OPCode = OPCode->next;
+	DataLinkedList* temp = OPCode->next;
+	*OPCode = OPCode->getNext();
+	free(temp);
+
+	//OPCode = OPCode->next;
 	return true;
 }
 

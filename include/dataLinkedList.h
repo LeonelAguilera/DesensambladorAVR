@@ -37,13 +37,31 @@ public:
 	DataLinkedList(const DataLinkedList& base) {
 		this->data = base.data;
 		if(base.next != 0) {
-			this->next = new DataLinkedList(*base.next);
+			/*
+			temp_data->next = (DataLinkedList*)malloc(sizeof(DataLinkedList));
+			if (temp_data->next != 0) {
+				*temp_data->next = DataLinkedList(temp_line.getDataHead());
+			}*/
+			this->next = (DataLinkedList*)malloc(sizeof(DataLinkedList));
+			if (this->next != 0) {
+				*this->next = DataLinkedList(*base.next);
+			}
+			else {
+				perror("Error copiando DataLinkedList");
+			}
 		}
 		else {
 			this->next = 0;
 		}
 	};
-	DataLinkedList getNext() { return *this->next; };
+	DataLinkedList getNext() {
+		if (this->next != 0){
+			return *this->next;
+		}
+		else {
+			return *this;
+		}
+	};
 
 	void print() {
 		printf("0x%04X\n", this->data);

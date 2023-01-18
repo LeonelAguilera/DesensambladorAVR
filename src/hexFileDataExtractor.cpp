@@ -21,6 +21,7 @@ License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <malloc.h>
 
 DataLinkedList getDataFromHex(FILE* fp) {
 	HexLine temp_line = HexLine(fp);
@@ -33,7 +34,13 @@ DataLinkedList getDataFromHex(FILE* fp) {
 			temp_data = temp_data->next;
 		}
 		temp_line = HexLine(fp);
-		temp_data->next = new DataLinkedList(temp_line.getDataHead());
+		temp_data->next = (DataLinkedList*)malloc(sizeof(DataLinkedList));
+		if (temp_data->next != 0) {
+			*temp_data->next = DataLinkedList(temp_line.getDataHead());
+		}
+		else {
+			perror("Error encadenando DataLinkedList de varias lineas");
+		}
 	}
 	//printf("0x%04X\n", temp_data->data);
 	return instructionsHead;
