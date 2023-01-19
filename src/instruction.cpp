@@ -86,7 +86,7 @@ bool InmediateByteInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	byte K = OPCode->data & 0x000F | (OPCode->data & 0x0F00) >> 4;
 	byte d = (OPCode->data & 0x00F0) >> 4;
 	d += 16;
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d,%d", this->_mnemonic, d, K); //Pendiente controlar signos negativos
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, %d", this->_mnemonic, d, K); //Pendiente controlar signos negativos
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
 	free(temp);
@@ -307,8 +307,9 @@ bool SingleBitInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 }
 
 bool DoubleSingleRegisterInstruction::isThisInstruction(word OPcode) {
-	OPcode &= 0x03FF;
-	return (OPcode == (OPcode >> 5)) && ((OPcode & this->_mask) == this->_OPcode);
+	byte Rr = OPcode & 0x000F | (OPcode & 0x0200) >> 5;
+	byte Rd = (OPcode >> 4) & 0x001F;
+	return (Rd == Rr) && ((OPcode & this->_mask) == this->_OPcode);
 }
 
 bool DoubleSingleRegisterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
@@ -316,8 +317,8 @@ bool DoubleSingleRegisterInstruction::codeLine(DataLinkedList* OPCode, char* ASM
 		return 0;
 	}
 
-	byte d = (OPCode->data >> 0) & 0x001F;
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s %d", this->_mnemonic, d);
+	byte d = (OPCode->data >> 4) & 0x001F;
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d", this->_mnemonic, d);
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
 	free(temp);

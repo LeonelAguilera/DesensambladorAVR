@@ -33,17 +33,7 @@ int main() {
 
 	DataLinkedList hexCode = getDataFromHex(hexFile);
 
-	//instructionList.print();
-
 	fclose(hexFile);
-
-	/*
-	Instruction ADC = Instruction(0b0001110000000000, 0b1111110000000000, "ADC", 5);
-
-	char ASMCode[INSTRUCTION_MAX_LENGTH]{};
-	DataLinkedList test = DataLinkedList(0b0001110110001111);
-	ADC.codeLine(&test, ASMCode);
-	puts(ASMCode);*/
 
 	FILE* asmFile;
 
@@ -70,14 +60,6 @@ int main() {
 			perror("Instruccion no reconocida");
 		}
 	}
-
-	/*
-	void print() {
-		printf("0x%04X\n", this->data);
-		if (this->next != 0) {
-			this->next->print();
-		}
-	}*/
 
 	fclose(asmFile);
 
