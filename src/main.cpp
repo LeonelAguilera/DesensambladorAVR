@@ -51,7 +51,8 @@ int main() {
 		bool failedFlag = true;
 		for (int i = 0; i < NUM_INSTRUCCIONES; i++) {
 			if (listaDeInstrucciones[i]->codeLine(&hexCode, ASMCode)) {
-				puts(ASMCode);
+				//puts(ASMCode);
+				fputs(ASMCode, asmFile);
 				failedFlag = false;
 				break;
 			}
