@@ -27,7 +27,8 @@ HexLine::HexLine(FILE* fp) {
 			this->byteCount = 0;
 			this->address = 0;
 			this->recordType = 0;
-			this->dataHead = 0;
+			//this->dataHead = 0; //¿How did this compiled in the first place?
+			this->dataHead = DataLinkedList(); //Temporary fix
 			this->checksum = 0;
 			this->nextLine = 0;
 			return;
@@ -37,7 +38,7 @@ HexLine::HexLine(FILE* fp) {
 	fgets(buffer, 3, fp);
 	this->byteCount = hexToByte(buffer);
 	fgets(buffer, 5, fp);
-	this->address = hexToWord(buffer);
+	this->address = hexToWord(buffer, false)/2;
 	fgets(buffer, 3, fp);
 	this->recordType = hexToByte(buffer);
 
@@ -45,9 +46,10 @@ HexLine::HexLine(FILE* fp) {
 	if (this->byteCount / 2 > 0) {
 		fgets(buffer, 5, fp);
 		temp->data = hexToWord(buffer);
+		temp->line = this->address;
 		for (uint8_t i = 1; i < this->byteCount / 2; i++) {
 			fgets(buffer, 5, fp);
-			temp->next = new DataLinkedList(hexToWord(buffer));
+			temp->next = new DataLinkedList(hexToWord(buffer), this->address+i);
 			temp = temp->next;
 		}
 	}
@@ -98,12 +100,17 @@ byte hexToByte(const char* hexStr) {
 
 	return singleHexCharToBin(hexStr[0]) << 4 | singleHexCharToBin(hexStr[1]);
 }
-word hexToWord(const char* hexStr) {
+word hexToWord(const char* hexStr, bool SwapBytes) {
 	if (hexStr[4] != '\0') {
 		return 0; //Error
 	}
 
-	return ((singleHexCharToBin(hexStr[2]) << 4 | singleHexCharToBin(hexStr[3]))<<8) | (singleHexCharToBin(hexStr[0]) << 4 | singleHexCharToBin(hexStr[1]));
+	if (SwapBytes) {
+		return ((singleHexCharToBin(hexStr[2]) << 4 | singleHexCharToBin(hexStr[3])) << 8) | (singleHexCharToBin(hexStr[0]) << 4 | singleHexCharToBin(hexStr[1]));
+	}
+	else {
+		return ((singleHexCharToBin(hexStr[0]) << 4 | singleHexCharToBin(hexStr[1])) << 8) | (singleHexCharToBin(hexStr[2]) << 4 | singleHexCharToBin(hexStr[3]));
+	}
 }
 
 byte singleHexCharToBin(const char hexChar) {

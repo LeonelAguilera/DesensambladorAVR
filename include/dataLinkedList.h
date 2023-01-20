@@ -30,18 +30,15 @@ typedef uint16_t word;
 class DataLinkedList {
 public:
 	word data;
+	word line;
 	DataLinkedList* next;
 public:
-	DataLinkedList() : data(0), next(0) {};
-	DataLinkedList(word data) : data(data), next(0) {};
+	DataLinkedList() : data(0), line(0), next(0) {};
+	DataLinkedList(word data, word line) : data(data), line(line), next(0) {};
 	DataLinkedList(const DataLinkedList& base) {
 		this->data = base.data;
+		this->line = base.line;
 		if(base.next != 0) {
-			/*
-			temp_data->next = (DataLinkedList*)malloc(sizeof(DataLinkedList));
-			if (temp_data->next != 0) {
-				*temp_data->next = DataLinkedList(temp_line.getDataHead());
-			}*/
 			this->next = (DataLinkedList*)malloc(sizeof(DataLinkedList));
 			if (this->next != 0) {
 				*this->next = DataLinkedList(*base.next);
@@ -73,7 +70,7 @@ public:
 
 
 byte hexToByte(const char* hexStr);
-word hexToWord(const char* hexStr);
+word hexToWord(const char* hexStr, bool SwapBytes = true);
 byte singleHexCharToBin(const char hexChar);
 
 bool singleHexCharToBin_UnitTest();

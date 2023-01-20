@@ -30,7 +30,7 @@ bool Instruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 
 	byte Rr = OPCode->data & 0x000F | (OPCode->data & 0x0200) >> 5;
 	byte Rd = (OPCode->data >> 4) & 0x001F;
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d,r%d\n", this->_mnemonic, Rd, Rr);
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d,r%d\n",OPCode->line, this->_mnemonic, Rd, Rr);
 
 	if (OPCode->next != 0) {
 		DataLinkedList* temp = OPCode->next;
@@ -47,11 +47,23 @@ bool BranchInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		return 0;
 	}
 
-	word k = OPCode->data & !this->_mask;
-	if (OPCode->data & 0x200) {
+	word k = OPCode->data & (~this->_mask);
+
+	if ((this->_mask & 0x0001) == 1) { //NOT relative branch
 		k = k >> 3;
+		bool isNegative = k & 0x0040;
+		for (uint8_t i = 7; i < 16; i++) {
+			k |= isNegative << i;
+		}
 	}
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d\n", this->_mnemonic, k); //Pendiente controlar signos negativos
+	else {
+		bool isNegative = k & 0x0800;
+		for (uint8_t i = 12; i < 16; i++) {
+			k |= isNegative << i;
+		}
+	}
+
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %d\n",OPCode->line, this->_mnemonic, (int16_t)k);
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
 	free(temp);
@@ -68,7 +80,7 @@ bool InmediateWordInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	byte K = OPCode->data & 0x000F | (OPCode->data & 0x00C0)>>2;
 	byte d = (OPCode->data & 0x0030) >> 4;
 	d = 24 + 2 * d;
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d:r%d,%d\n", this->_mnemonic, d+1,d,K); //Pendiente controlar signos negativos
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d:r%d,%d\n",OPCode->line, this->_mnemonic, d+1,d,K); //Pendiente controlar signos negativos
 
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
@@ -86,7 +98,7 @@ bool InmediateByteInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	byte K = OPCode->data & 0x000F | (OPCode->data & 0x0F00) >> 4;
 	byte d = (OPCode->data & 0x00F0) >> 4;
 	d += 16;
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, %d\n", this->_mnemonic, d, K); //Pendiente controlar signos negativos
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %d\n",OPCode->line, this->_mnemonic, d, K); //Pendiente controlar signos negativos
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
 	free(temp);
@@ -103,10 +115,10 @@ bool SingleRegisterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) 
 	byte d = (OPCode->data & 0x01F0) >> 4;
 	if ((this->_mask & 0x0001) == 0) { //Se trata de BLD o BST
 		byte b = (OPCode->data & 0x0007);
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d,%d\n", this->_mnemonic, d, b);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d,%d\n",OPCode->line, this->_mnemonic, d, b);
 	}
 	else {
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d\n",OPCode->line, this->_mnemonic, d);
 	}
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
@@ -126,53 +138,53 @@ bool LoadInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 
 	switch (this->_OPcode) {
 	case 0b1001000000000110:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, Z\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, Z\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001000000000111:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, Z+\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, Z+\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001000000001100:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, X\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, X\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001000000001101:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, X+\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, X+\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001000000001110:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, -X\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, -X\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1000000000001000:
 		if (q == 0) {
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, Y\n", this->_mnemonic, d);
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, Y\n",OPCode->line, this->_mnemonic, d);
 		}
 		else {
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, Y+%d\n", this->_mnemonic, d, q);
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, Y+%d\n",OPCode->line, this->_mnemonic, d, q);
 		}
 		break;
 	case 0b1001000000001001:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, Y+\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, Y+\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001000000001010:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, -Y\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, -Y\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1000000000000000:
 		if (q == 0) {
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, Z\n", this->_mnemonic, d);
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, Z\n",OPCode->line, this->_mnemonic, d);
 		}
 		else {
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, Z+%d\n", this->_mnemonic, d, q);
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, Z+%d\n",OPCode->line, this->_mnemonic, d, q);
 		}
 		break;
 	case 0b1001000000000001:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, Z+\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, Z+\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001000000000010:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, -Z\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, -Z\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001000000000100:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, Z\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, Z\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001000000000101:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, Z+\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, Z+\n",OPCode->line, this->_mnemonic, d);
 		break;
 	default:
 		return 0;
@@ -195,59 +207,59 @@ bool StoreInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 
 	switch (this->_OPcode) {
 	case 0b1001001000000110:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s Z, r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s Z, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001001000000101:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s Z, r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s Z, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001001000000111:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s Z, r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s Z, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1111110000000000:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, %d\n", this->_mnemonic, d, q & 0x07);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %d\n",OPCode->line, this->_mnemonic, d, q & 0x07);
 		break;
 	case 0b1111111000000000:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, %d\n", this->_mnemonic, d, q & 0x07);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %d\n",OPCode->line, this->_mnemonic, d, q & 0x07);
 		break;
 	case 0b1001001000001100:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s X, r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s X, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001001000001101:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s X+, r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s X+, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001001000001110:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s -X, r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s -X, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1000001000001000:
 		if (q == 0) {
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s Y, r%d\n", this->_mnemonic, d);
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s Y, r%d\n",OPCode->line, this->_mnemonic, d);
 		}
 		else {
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s Y+%d, r%d\n", this->_mnemonic, d, q);
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s Y+%d, r%d\n",OPCode->line, this->_mnemonic, d, q);
 		}
 		break;
 	case 0b1001001000001001:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s Y+, r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s Y+, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001001000001010:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s -Y, r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s -Y, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1000001000000000:
 		if (q == 0) {
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s Z, r%d\n", this->_mnemonic, d);
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s Z, r%d\n",OPCode->line, this->_mnemonic, d);
 		}
 		else {
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s Z+%d, r%d\n", this->_mnemonic, d, q);
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s Z+%d, r%d\n",OPCode->line, this->_mnemonic, d, q);
 		}
 		break;
 	case 0b1001001000000001:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s Z+, r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s Z+, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001001000000010:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s -Z, r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s -Z, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1001001000000100:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s Z, r%d\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s Z, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	default:
 		return 0;
@@ -266,7 +278,7 @@ bool SREGInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	}
 
 	byte s = (OPCode->data >> 4) & 0x0007;
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s %d\n", this->_mnemonic, s);
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %d\n",OPCode->line, this->_mnemonic, s);
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
 	free(temp);
@@ -280,7 +292,7 @@ bool NoParameterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		return 0;
 	}
 
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s\n", this->_mnemonic);
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s\n", OPCode->line, this->_mnemonic);
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
 	free(temp);
@@ -297,7 +309,7 @@ bool SingleBitInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	byte A = (OPCode->data >> 3) & 0x001F;
 	byte b = (OPCode->data >> 0) & 0x0007;
 
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s %d, %d\n", this->_mnemonic, A, b);
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %d, %d\n",OPCode->line, this->_mnemonic, A, b);
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
 	free(temp);
@@ -318,7 +330,7 @@ bool DoubleSingleRegisterInstruction::codeLine(DataLinkedList* OPCode, char* ASM
 	}
 
 	byte d = (OPCode->data >> 4) & 0x001F;
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d\n", this->_mnemonic, d);
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d\n",OPCode->line, this->_mnemonic, d);
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
 	free(temp);
@@ -335,7 +347,7 @@ bool FMULInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	byte d = (OPCode->data >> 4) & 0x0007;
 	byte r = (OPCode->data >> 0) & 0x0007;
 
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, r%d\n", this->_mnemonic, d, r);
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, r%d\n",OPCode->line, this->_mnemonic, d, r);
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
 	free(temp);
@@ -353,10 +365,10 @@ bool IOInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	byte dr = (OPCode->data >> 4) & 0x001F;
 
 	if (this->_OPcode & 0x0800) {
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s %d, r%d\n", this->_mnemonic, A, dr);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %#02X, r%d\n",OPCode->line, this->_mnemonic, A, dr);
 	}
 	else {
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, %d\n", this->_mnemonic, dr, A);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %#02X\n",OPCode->line, this->_mnemonic, dr, A);
 	}
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
@@ -376,19 +388,19 @@ bool ExtraInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 
 	switch (this->_OPcode) {
 	case 0b1001010000001011:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s 0x%04X\n", this->_mnemonic, d);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%04X\n",OPCode->line, this->_mnemonic, d);
 		break;
 	case 0b1010000000000000:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, %d\n", this->_mnemonic, d + 16, k);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %d\n",OPCode->line, this->_mnemonic, d + 16, k);
 		break;
 	case 0b0000000100000000:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d:%d, r%d:%d\n", this->_mnemonic, (d*2)+1, d*2, ((k&0x0F)*2)+1, (k & 0x0F) * 2);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d:%d, r%d:%d\n",OPCode->line, this->_mnemonic, (d*2)+1, d*2, ((k&0x0F)*2)+1, (k & 0x0F) * 2);
 		break;
 	case 0b0000001000000000:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, r%d\n", this->_mnemonic, d + 16, (k & 0x0F) + 16);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, r%d\n",OPCode->line, this->_mnemonic, d + 16, (k & 0x0F) + 16);
 		break;
 	case 0b1010100000000000:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s %d, r%d\n", this->_mnemonic, k, d + 16);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %d, r%d\n",OPCode->line, this->_mnemonic, k, d + 16);
 		break;
 	default:
 		return 0;
@@ -418,10 +430,10 @@ bool ThirtyTwoBitsInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		//OPCode = OPCode->next;
 		word k = OPCode->data;
 		if (this->_OPcode & 0x0200) { //STS
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s %d, r%d\n", this->_mnemonic, k, d);
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %d, r%d\n",OPCode->line-1, this->_mnemonic, k, d);
 		}
 		else {
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s r%d, %d\n", this->_mnemonic, d, k);
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %d\n",OPCode->line-1, this->_mnemonic, d, k);
 		}
 	}
 	else {
@@ -434,7 +446,7 @@ bool ThirtyTwoBitsInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		//OPCode = OPCode->next;
 		k |= OPCode->data;
 
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "%s 0x%06X\n", this->_mnemonic, k);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%06X\n",OPCode->line-1, this->_mnemonic, k);
 	}
 
 	DataLinkedList* temp = OPCode->next;
