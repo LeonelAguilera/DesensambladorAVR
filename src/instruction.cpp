@@ -365,10 +365,10 @@ bool IOInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	byte dr = (OPCode->data >> 4) & 0x001F;
 
 	if (this->_OPcode & 0x0800) {
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %#02X, r%d\n",OPCode->line, this->_mnemonic, A, dr);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%02X, r%d\n",OPCode->line, this->_mnemonic, A, dr);
 	}
 	else {
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %#02X\n",OPCode->line, this->_mnemonic, dr, A);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, 0x%02X\n",OPCode->line, this->_mnemonic, dr, A);
 	}
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();

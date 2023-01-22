@@ -30,6 +30,7 @@ protected:
 	const word _mask;
 	const char* _mnemonic;
 	const byte _man;
+	const static char memLocations[256][7];
 public:
 	Instruction(word OPcode, word mask, const char* mnemonic, byte man) :_OPcode(OPcode), _mask(mask), _mnemonic(mnemonic), _man(man) {};
 
