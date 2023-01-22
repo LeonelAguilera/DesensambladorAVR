@@ -365,10 +365,12 @@ bool IOInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	byte dr = (OPCode->data >> 4) & 0x001F;
 
 	if (this->_OPcode & 0x0800) {
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%02X, r%d\n",OPCode->line, this->_mnemonic, A, dr);
+		//sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%02X, r%d\n",OPCode->line, this->_mnemonic, A, dr);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %s, r%d\n", OPCode->line, this->_mnemonic, Instruction::memLocations[A+0x20], dr);
 	}
 	else {
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, 0x%02X\n",OPCode->line, this->_mnemonic, dr, A);
+		//sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, 0x%02X\n",OPCode->line, this->_mnemonic, dr, A);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %s\n", OPCode->line, this->_mnemonic, dr, Instruction::memLocations[A + 0x20]);
 	}
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
@@ -604,3 +606,5 @@ void inicializador(Instruction** ListaDe144Instrucciones) {
 	ListaDe144Instrucciones[143] = new Instruction(0b0001110000000000, 0b1111110000000000, "ADC", 5);
 	return;
 }
+
+const char Instruction::memLocations[256][7] = { "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15", "R16", "R17", "R18", "R19", "R20", "R21", "R22", "R23", "R24", "R25", "R26", "R27", "R28", "R29", "R30", "R31", "RESERV", "RESERV", "RESERV", "PINB", "DDRB", "PORTB", "PINC", "DDRC", "PORTC", "PIND", "DDRD", "PORTD", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "TIFR0", "TIFR1", "TIFR2", "RESERV", "RESERV", "RESERV", "PCIFR", "EIFR", "EIMSK", "GPIOR0", "EECR", "EEDR", "EEARL", "EEARH", "GTCCR", "TCCR0A", "TCCR0B", "TCNT0", "OCR0A", "OCR0B", "RESERV", "GPIOR1", "GPIOR2", "SPCR", "SPSR", "SPDR", "RESERV", "ACSR", "RESERV", "RESERV", "SMCR", "MCUSR", "MCUCR", "RESERV", "SPMCSR", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "SPL", "SPH", "SREG", "WDTCSR", "CLKPR", "RESERV", "RESERV", "PRR", "RESERV", "OSCCAL", "RESERV", "PCICR", "EICRA", "RESERV", "PCMSK0", "PCMSK1", "PCMSK2", "TIMSK0", "TIMSK1", "TIMSK2", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "ADCL", "ADCH", "ADCSRA", "ADCSRB", "ADMUX", "RESERV", "DIDR0", "DIDR1", "TCCR1A", "TCCR1B", "TCCR1C", "RESERV", "TCNT1L", "TCNT1H", "ICR1L", "ICR1H", "OCR1AL", "OCR1AH", "OCR1BL", "OCR1BH", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "TCCR2A", "TCCR2B", "TCNT2", "OCR2A", "OCR2B", "RESERV", "ASSR", "RESERV", "TWBR", "TWSR", "TWAR", "TWDR", "TWCR", "TWAMR", "RESERV", "RESERV", "UCSR0A", "UCSR0B", "UCSR0C", "RESERV", "UBRR0L", "UBRR0H", "UDR0", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV"};
