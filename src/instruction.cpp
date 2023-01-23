@@ -18,6 +18,7 @@ License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 
 #include "instruction.h"
 #include <malloc.h>
+#include <string.h>
 
 bool Instruction::isThisInstruction(word OPcode) {
 	return (OPcode & this->_mask) == this->_OPcode;
@@ -365,12 +366,20 @@ bool IOInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	byte dr = (OPCode->data >> 4) & 0x001F;
 
 	if (this->_OPcode & 0x0800) {
-		//sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%02X, r%d\n",OPCode->line, this->_mnemonic, A, dr);
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %s, r%d\n", OPCode->line, this->_mnemonic, Instruction::memLocations[A+0x20], dr);
+		if (strcmp(Instruction::memLocations[A + 0x20], "RESERV") == 0) {
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%02X, r%d\n", OPCode->line, this->_mnemonic, A, dr);
+		}
+		else {
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %s, r%d\n", OPCode->line, this->_mnemonic, Instruction::memLocations[A + 0x20], dr);
+		}
 	}
 	else {
-		//sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, 0x%02X\n",OPCode->line, this->_mnemonic, dr, A);
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %s\n", OPCode->line, this->_mnemonic, dr, Instruction::memLocations[A + 0x20]);
+		if (strcmp(Instruction::memLocations[A + 0x20], "RESERV") == 0) {
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, 0x%02X\n", OPCode->line, this->_mnemonic, dr, A);
+		}
+		else {
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %s\n", OPCode->line, this->_mnemonic, dr, Instruction::memLocations[A + 0x20]);
+		}
 	}
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
@@ -388,21 +397,36 @@ bool ExtraInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	byte d = (OPCode->data >> 4) & 0x000F;
 	byte k = ((OPCode->data >> 0) & 0x000F) | ((OPCode->data >> 4) & 0x0070);
 
+	byte memAddress = k & 0x0F;
+	memAddress |= (k >> 1) & 0x30;
+	memAddress |= (k << 2) & 0x40;
+	memAddress |= ((~k) << 3) & 0x80; //What the fuck Atmel?
+
 	switch (this->_OPcode) {
-	case 0b1001010000001011:
+	case 0b1001010000001011: //DES
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%04X\n",OPCode->line, this->_mnemonic, d);
 		break;
-	case 0b1010000000000000:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %d\n",OPCode->line, this->_mnemonic, d + 16, k);
+	case 0b1010000000000000: //LDS
+		if (strcmp(Instruction::memLocations[memAddress], "RESERV") == 0) {
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, 0x%02X\n", OPCode->line, this->_mnemonic, d + 16, memAddress);
+		}
+		else {
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %s\n", OPCode->line, this->_mnemonic, d + 16, Instruction::memLocations[memAddress]);
+		}
 		break;
-	case 0b0000000100000000:
+	case 0b0000000100000000: //MOVW
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d:%d, r%d:%d\n",OPCode->line, this->_mnemonic, (d*2)+1, d*2, ((k&0x0F)*2)+1, (k & 0x0F) * 2);
 		break;
-	case 0b0000001000000000:
+	case 0b0000001000000000: //MULS
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, r%d\n",OPCode->line, this->_mnemonic, d + 16, (k & 0x0F) + 16);
 		break;
-	case 0b1010100000000000:
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %d, r%d\n",OPCode->line, this->_mnemonic, k, d + 16);
+	case 0b1010100000000000: //STS
+		if (strcmp(Instruction::memLocations[memAddress], "RESERV") == 0) {
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%02X, r%d\n", OPCode->line, this->_mnemonic, memAddress, d + 16);
+		}
+		else {
+			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %s, r%d\n", OPCode->line, this->_mnemonic, Instruction::memLocations[memAddress], d + 16);
+		}
 		break;
 	default:
 		return 0;
@@ -432,13 +456,33 @@ bool ThirtyTwoBitsInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		//OPCode = OPCode->next;
 		word k = OPCode->data;
 		if (this->_OPcode & 0x0200) { //STS
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %d, r%d\n",OPCode->line-1, this->_mnemonic, k, d);
+			if (k > 255) {
+				sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%04X, r%d\n", OPCode->line - 1, this->_mnemonic, k, d);
+			}
+			else {
+				if (strcmp(Instruction::memLocations[k], "RESERV") == 0) {
+					sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%04X, r%d\n", OPCode->line - 1, this->_mnemonic, k, d);
+				}
+				else {
+					sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %s, r%d\n", OPCode->line - 1, this->_mnemonic, Instruction::memLocations[k], d);
+				}
+			}
 		}
-		else {
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %d\n",OPCode->line-1, this->_mnemonic, d, k);
+		else {	//LDS
+			if (k > 255) {
+				sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, 0x%04X\n", OPCode->line - 1, this->_mnemonic, d, k);
+			}
+			else {
+				if (strcmp(Instruction::memLocations[k], "RESERV") == 0) {
+					sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, 0x%04X\n", OPCode->line - 1, this->_mnemonic, d, k);
+				}
+				else {
+					sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, %s\n", OPCode->line - 1, this->_mnemonic, d, Instruction::memLocations[k]);
+				}
+			}
 		}
 	}
-	else {
+	else { //JMP or CALL
 		uint32_t k = (OPCode->data & 0x0001) | ((OPCode->data & 0x01F0) >> 3);
 		k = k << 16;
 		DataLinkedList* temp = OPCode->next;
