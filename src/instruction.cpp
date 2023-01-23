@@ -125,7 +125,7 @@ bool BranchInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		}
 	}
 
-	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %d\n",OPCode->line, this->_mnemonic, (int16_t)k);
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%04X\n",OPCode->line, this->_mnemonic, OPCode->line+((int16_t)k)+1);
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
 	free(temp);
