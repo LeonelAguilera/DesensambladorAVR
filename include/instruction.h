@@ -20,6 +20,8 @@ License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 #define __INSTRUCTION_H__
 
 #include "dataLinkedList.h"
+#include <malloc.h>
+#include <string.h>
 
 #define INSTRUCTION_MAX_LENGTH 50
 #define NUM_INSTRUCCIONES 144

@@ -19,12 +19,9 @@ License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 #ifndef __DATA_LINKED_LIST_H__
 #define __DATA_LINKED_LIST_H__
 
-#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-typedef uint8_t byte;
-typedef uint16_t word;
+#include "unitConversions.h"
 
 
 class DataLinkedList {
@@ -68,14 +65,4 @@ public:
 	}
 };
 
-
-byte hexToByte(const char* hexStr);
-word hexToWord(const char* hexStr, bool SwapBytes = true);
-byte singleHexCharToBin(const char hexChar);
-
-bool singleHexCharToBin_UnitTest();
-bool hexToByte_UnitTest();
-bool hexToWord_UnitTest();
-
-void run_unit_tests();
 #endif // !__DATA_LINKED_LIST_H__

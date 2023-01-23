@@ -17,11 +17,6 @@ License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "hexFileDataExtractor.h"
-#include "hexline.h"
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <malloc.h>
 
 DataLinkedList getDataFromHex(FILE* fp) {
 	HexLine temp_line = HexLine(fp);

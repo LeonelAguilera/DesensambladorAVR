@@ -17,8 +17,6 @@ License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "instruction.h"
-#include <malloc.h>
-#include <string.h>
 
 /*
 * This method determines if a certain 16bit OPcode belongs to the
