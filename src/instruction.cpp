@@ -20,13 +20,42 @@ License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 #include <malloc.h>
 #include <string.h>
 
+/*
+* This method determines if a certain 16bit OPcode belongs to the
+* instruction saved in this object.
+* It does so first by clearing all the bits that can be changed to
+* introduce data inside the instruction by anding it with a mask and
+* then comparing the result with the saved OPcode of the object.
+*/
 bool Instruction::isThisInstruction(word OPcode) {
 	return (OPcode & this->_mask) == this->_OPcode;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+ADC
+ADD
+AND
+CP
+CPC
+CPSE
+EOR
+MOV
+MUL
+OR
+SBC
+SUB
+*/
 bool Instruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte Rr = OPCode->data & 0x000F | (OPCode->data & 0x0200) >> 5;
@@ -43,9 +72,41 @@ bool Instruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+BRBC
+BRBS
+BRCC
+BRCS
+BREQ
+BRGE
+BRHC
+BRHS
+BRID
+BRIE
+BRLO
+BRLT
+BRMI
+BRNE
+BRPL
+BRSH
+BRTC
+BRTS
+BRVC
+BRVS
+RCALL
+RJMP
+*/
 bool BranchInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data) || this->_man == 13 || this->_man == 14) {
-		return 0;
+		return false;
 	}
 
 	word k = OPCode->data & (~this->_mask);
@@ -73,9 +134,21 @@ bool BranchInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+ADIW
+SBIW
+*/
 bool InmediateWordInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte K = OPCode->data & 0x000F | (OPCode->data & 0x00C0)>>2;
@@ -91,9 +164,26 @@ bool InmediateWordInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+ANDI
+CPI
+LDI
+ORI
+SBCI
+SBR
+SUBI
+*/
 bool InmediateByteInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte K = OPCode->data & 0x000F | (OPCode->data & 0x0F00) >> 4;
@@ -108,9 +198,32 @@ bool InmediateByteInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+ASR
+BLD
+BST
+COM
+DEC
+INC
+LSR
+NEG
+POP
+PUSH
+ROR
+SER
+SWAP
+*/
 bool SingleRegisterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte d = (OPCode->data & 0x01F0) >> 4;
@@ -129,9 +242,34 @@ bool SingleRegisterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) 
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+ELPM
+ELPM
+LD
+LD
+LD
+LD
+LD
+LD
+LDD
+LD
+LD
+LD
+LDD
+LPM
+LPM
+*/
 bool LoadInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte d = (OPCode->data & 0x01F0) >> 4;
@@ -188,7 +326,7 @@ bool LoadInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s r%d, Z+\n",OPCode->line, this->_mnemonic, d);
 		break;
 	default:
-		return 0;
+		return false;
 	}
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
@@ -198,9 +336,36 @@ bool LoadInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+LAC
+LAS
+LAT
+SBRC
+SBRS
+ST
+ST
+ST
+ST
+ST
+ST
+STD
+ST
+ST
+ST
+STD
+XCH
+*/
 bool StoreInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte d = (OPCode->data & 0x01F0) >> 4;
@@ -263,7 +428,7 @@ bool StoreInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s Z, r%d\n",OPCode->line, this->_mnemonic, d);
 		break;
 	default:
-		return 0;
+		return false;
 	}
 	DataLinkedList* temp = OPCode->next;
 	*OPCode = OPCode->getNext();
@@ -273,9 +438,21 @@ bool StoreInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+BCLR
+BSET
+*/
 bool SREGInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte s = (OPCode->data >> 4) & 0x0007;
@@ -288,9 +465,50 @@ bool SREGInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+BREAK
+CLC
+CLH
+CLI
+CLN
+CLS
+CLT
+CLV
+CLZ
+EICALL
+EIJMP
+ELPM
+ICALL
+IJMP
+LPM
+NOP
+RET
+RETI
+SEC
+SEH
+SEI
+SEN
+SES
+SET
+SEV
+SEZ
+SLEEP
+SPM
+SPM
+SPM
+WDR
+*/
 bool NoParameterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s\n", OPCode->line, this->_mnemonic);
@@ -302,9 +520,23 @@ bool NoParameterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+CBI
+SBI
+SBIC
+SBIS
+*/
 bool SingleBitInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte A = (OPCode->data >> 3) & 0x001F;
@@ -319,15 +551,43 @@ bool SingleBitInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+CLR
+LSL
+ROL
+TST
+*/
 bool DoubleSingleRegisterInstruction::isThisInstruction(word OPcode) {
 	byte Rr = OPcode & 0x000F | (OPcode & 0x0200) >> 5;
 	byte Rd = (OPcode >> 4) & 0x001F;
 	return (Rd == Rr) && ((OPcode & this->_mask) == this->_OPcode);
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+FMUL
+FMULS
+FMULSU
+MULSU
+*/
 bool DoubleSingleRegisterInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte d = (OPCode->data >> 4) & 0x001F;
@@ -340,9 +600,23 @@ bool DoubleSingleRegisterInstruction::codeLine(DataLinkedList* OPCode, char* ASM
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+FMUL
+FMULS
+FMULSU
+MULSU
+*/
 bool FMULInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte d = (OPCode->data >> 4) & 0x0007;
@@ -357,9 +631,21 @@ bool FMULInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+IN
+OUT
+*/
 bool IOInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte A = (OPCode->data & 0x0600) >> 5 | (OPCode->data & 0x000F);
@@ -389,9 +675,24 @@ bool IOInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 16 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+DES
+LDS
+MOVW
+MULS
+STS
+*/
 bool ExtraInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte d = (OPCode->data >> 4) & 0x000F;
@@ -429,7 +730,7 @@ bool ExtraInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		}
 		break;
 	default:
-		return 0;
+		return false;
 		break;
 	}
 	DataLinkedList* temp = OPCode->next;
@@ -440,9 +741,23 @@ bool ExtraInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+/*
+* This method takes an OPCode object and a character array
+* Reads the 32 bit instruction inside it and if it belongs to the
+* instruction contained in this object, its ASM code line is written
+* into the character array and the OPCode object is updated to the
+* next one.
+*/
+/*
+* This method handles the next instructions:
+CALL
+JMP
+LDS
+STS
+*/
 bool ThirtyTwoBitsInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	if (!this->isThisInstruction(OPCode->data)) {
-		return 0;
+		return false;
 	}
 
 	byte k = ((OPCode->data >> 0) & 0x000F) | ((OPCode->data >> 4) & 0x0070);
