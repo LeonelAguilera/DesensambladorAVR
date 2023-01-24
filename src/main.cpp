@@ -22,30 +22,52 @@ If not, see <https://www.gnu.org/licenses/>.
 #include "dataLinkedList.h"
 #include "instruction.h"
 
-int main() {
-	FILE* hexFile;
+DataLinkedList getHexCodeFromNamedFile(const char* fileName);
+bool writeASMFileFromHexcode(DataLinkedList hexCode, const char* destinationFile);
 
-	fopen_s(&hexFile, "code.hex", "r");
-	if (hexFile == 0) {
-		perror("Hex file opening failed");
+int main() {
+
+	DataLinkedList hexCode = getHexCodeFromNamedFile("code.hex");
+
+	if (writeASMFileFromHexcode(hexCode, "asmFile.asm")) {
 		return 0;
 	}
+	else {
+		return -1;
+	}
 
-	DataLinkedList hexCode = getDataFromHex(hexFile);
+	return 0;
+}
+
+DataLinkedList getHexCodeFromNamedFile(const char* fileName) {
+	FILE* hexFile;
+	DataLinkedList hexCode;
+
+	fopen_s(&hexFile, fileName, "r");
+	if (hexFile == 0) {
+		perror("Hex file opening failed");
+		return hexCode;
+	}
+
+	hexCode = getDataFromHex(hexFile);
 
 	fclose(hexFile);
 
+	return hexCode;
+}
+
+bool writeASMFileFromHexcode(DataLinkedList hexCode, const char* destinationFile) {
 	FILE* asmFile;
 
-	fopen_s(&asmFile, "asmFile.asm", "w");
+	fopen_s(&asmFile, destinationFile, "w");
 	if (asmFile == 0) {
 		perror("ASM file creation failed");
-		return 0;
+		return false;
 	}
 
 	Instruction* listaDeInstrucciones[NUM_INSTRUCCIONES];
 	inicializador(listaDeInstrucciones);
-	
+
 	while (hexCode.next != 0) {
 		char ASMCode[INSTRUCTION_MAX_LENGTH]{};
 		bool failedFlag = true;
@@ -64,5 +86,5 @@ int main() {
 
 	fclose(asmFile);
 
-	return 0;
+	return true;
 }
