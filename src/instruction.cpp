@@ -816,6 +816,16 @@ bool ThirtyTwoBitsInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 	return true;
 }
 
+void Instruction::handleUnknownInstruction(DataLinkedList* OPCode, char* ASMCode) {
+	sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: UNK: 0x%04X\n", OPCode->line, OPCode->data);
+
+	if (OPCode->next != 0) {
+		DataLinkedList* temp = OPCode->next;
+		*OPCode = OPCode->getNext();
+		free(temp);
+	}
+}
+
 void inicializador(Instruction** ListaDe144Instrucciones) {
 	ListaDe144Instrucciones[0] = new ThirtyTwoBitsInstruction(0b1001001000000000, 0b1111111000001111, "STS", 121);
 	ListaDe144Instrucciones[1] = new ThirtyTwoBitsInstruction(0b1001000000000000, 0b1111111000001111, "LDS", 74);

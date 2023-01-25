@@ -243,13 +243,7 @@ bool writeASMFileFromHexcode(DataLinkedList hexCode, const char* destinationFile
 #endif // _DEBUG
 		}
 		if (failedFlag) {
-			sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: UNK: 0x%04X\n", hexCode.line, hexCode.data);
-
-			if (hexCode.next != 0) {
-				DataLinkedList* temp = hexCode.next;
-				hexCode = hexCode.getNext();
-				free(temp);
-			}
+			Instruction::handleUnknownInstruction(&hexCode, ASMCode);
 			fputs(ASMCode, asmFile);
 			//perror("Instruccion no reconocida");
 		}

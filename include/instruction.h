@@ -38,6 +38,8 @@ public:
 
 	virtual bool isThisInstruction(word OPcode);
 	virtual bool codeLine(DataLinkedList* OPCode, char* ASMCode);
+
+	static void handleUnknownInstruction(DataLinkedList* OPCode, char* ASMCode);
 };
 
 class BranchInstruction :public Instruction {
