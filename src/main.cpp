@@ -224,8 +224,6 @@ bool writeASMFileFromHexcode(DataLinkedList hexCode, const char* destinationFile
 	Instruction* listaDeInstrucciones[NUM_INSTRUCCIONES];
 	inicializador(listaDeInstrucciones);
 
-	uint32_t counter = 0;
-
 	while (hexCode.next != 0) {
 		char ASMCode[INSTRUCTION_MAX_LENGTH]{};
 		bool failedFlag = true;
@@ -236,18 +234,12 @@ bool writeASMFileFromHexcode(DataLinkedList hexCode, const char* destinationFile
 				failedFlag = false;
 				break;
 			}
-#ifdef _DEBUG
-			else {
-				failedFlag = true;
-			}
-#endif // _DEBUG
 		}
 		if (failedFlag) {
 			Instruction::handleUnknownInstruction(&hexCode, ASMCode);
 			fputs(ASMCode, asmFile);
 			//perror("Instruccion no reconocida");
 		}
-		counter++;
 	}
 
 	fclose(asmFile);
