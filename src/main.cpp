@@ -22,6 +22,7 @@ If not, see <https://www.gnu.org/licenses/>.
 #include "hexFileDataExtractor.h"
 #include "dataLinkedList.h"
 #include "instruction.h"
+#include "outputCode.h"
 
 #define DEBUG
 
@@ -223,6 +224,8 @@ bool writeASMFileFromHexcode(DataLinkedList hexCode, const char* destinationFile
 
 	Instruction* listaDeInstrucciones[NUM_INSTRUCCIONES];
 	inicializador(listaDeInstrucciones);
+
+	OutputCode outputCode;
 
 	while (hexCode.next != 0) {
 		char ASMCode[INSTRUCTION_MAX_LENGTH]{};
