@@ -228,22 +228,27 @@ bool writeASMFileFromHexcode(DataLinkedList hexCode, const char* destinationFile
 	OutputCode outputCode;
 
 	while (hexCode.next != 0) {
-		char ASMCode[INSTRUCTION_MAX_LENGTH]{};
+		char ASMLine[INSTRUCTION_MAX_LENGTH]{};
 		bool failedFlag = true;
 		for (int i = 0; i < NUM_INSTRUCCIONES; i++) {
-			if (listaDeInstrucciones[i]->codeLine(&hexCode, ASMCode)) {
-				//puts(ASMCode);
-				fputs(ASMCode, asmFile);
+			if (listaDeInstrucciones[i]->codeLine(&hexCode, ASMLine)) {
+				//puts(ASMLine);
+				//fputs(ASMLine, asmFile);
+				//outputCode.addLine(ASMLine);
 				failedFlag = false;
 				break;
 			}
 		}
 		if (failedFlag) {
-			Instruction::handleUnknownInstruction(&hexCode, ASMCode);
-			fputs(ASMCode, asmFile);
+			Instruction::handleUnknownInstruction(&hexCode, ASMLine);
+			//outputCode.addLine(ASMLine);
+			//fputs(ASMLine, asmFile);
 			//perror("Instruccion no reconocida");
 		}
+		outputCode.addLine(ASMLine);
 	}
+
+	fputs(outputCode.turnIntoString(), asmFile);
 
 	fclose(asmFile);
 

@@ -43,14 +43,15 @@ void OutputCode::addLine(const char* codeLine)
 
 const char* OutputCode::turnIntoString()
 {
-	size_t numberOfBytes = (this->numberOfLines)*INSTRUCTION_MAX_LENGTH*sizeof(char);
-	char* outputString = (char*)malloc(numberOfBytes);
+	size_t numberOfChars = (this->numberOfLines)*INSTRUCTION_MAX_LENGTH;
+	char* outputString = (char*)calloc(numberOfChars, sizeof(char));
 	if (outputString == nullptr) {
 		return nullptr;
 	}
 	OutputCodeLine* currentLine = this->head;
 	while (currentLine != 0) {
-		strcat_s(outputString, numberOfBytes, currentLine->_codeLine);
+		strcat_s(outputString, numberOfChars* sizeof(char), currentLine->_codeLine);
+		currentLine = currentLine->next;
 	}
 	return outputString;
 }
