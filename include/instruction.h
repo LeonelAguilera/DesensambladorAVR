@@ -20,6 +20,7 @@ License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 #define __INSTRUCTION_H__
 
 #include "dataLinkedList.h"
+#include "labels.h"
 #include <malloc.h>
 #include <string.h>
 
@@ -33,6 +34,7 @@ protected:
 	const char* _mnemonic;
 	const byte _man;
 	const static char memLocations[256][7];
+	static LabelLinkedList codeLabels;
 public:
 	Instruction(word OPcode, word mask, const char* mnemonic, byte man) :_OPcode(OPcode), _mask(mask), _mnemonic(mnemonic), _man(man) {};
 

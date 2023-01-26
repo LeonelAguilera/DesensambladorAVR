@@ -18,6 +18,7 @@ License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 
 #include "instruction.h"
 
+
 /*
 * This method determines if a certain 16bit OPcode belongs to the
 * instruction saved in this object.
@@ -805,7 +806,11 @@ bool ThirtyTwoBitsInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		//OPCode = OPCode->next;
 		k |= OPCode->data;
 
-		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%06X\n",OPCode->line-1, this->_mnemonic, k);
+		char destinationLabelName[MAX_LABEL_NAME_LENGTH]{};
+		this->codeLabels.getLabelName(OPCode->line, k, destinationLabelName);
+
+		//sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%06X\n",OPCode->line-1, this->_mnemonic, k);
+		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %s\n", OPCode->line - 1, this->_mnemonic, destinationLabelName);
 	}
 
 	DataLinkedList* temp = OPCode->next;
@@ -975,3 +980,9 @@ void inicializador(Instruction** ListaDe144Instrucciones) {
 }
 
 const char Instruction::memLocations[256][7] = { "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15", "R16", "R17", "R18", "R19", "R20", "R21", "R22", "R23", "R24", "R25", "R26", "R27", "R28", "R29", "R30", "R31", "RESERV", "RESERV", "RESERV", "PINB", "DDRB", "PORTB", "PINC", "DDRC", "PORTC", "PIND", "DDRD", "PORTD", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "TIFR0", "TIFR1", "TIFR2", "RESERV", "RESERV", "RESERV", "PCIFR", "EIFR", "EIMSK", "GPIOR0", "EECR", "EEDR", "EEARL", "EEARH", "GTCCR", "TCCR0A", "TCCR0B", "TCNT0", "OCR0A", "OCR0B", "RESERV", "GPIOR1", "GPIOR2", "SPCR", "SPSR", "SPDR", "RESERV", "ACSR", "RESERV", "RESERV", "SMCR", "MCUSR", "MCUCR", "RESERV", "SPMCSR", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "SPL", "SPH", "SREG", "WDTCSR", "CLKPR", "RESERV", "RESERV", "PRR", "RESERV", "OSCCAL", "RESERV", "PCICR", "EICRA", "RESERV", "PCMSK0", "PCMSK1", "PCMSK2", "TIMSK0", "TIMSK1", "TIMSK2", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "ADCL", "ADCH", "ADCSRA", "ADCSRB", "ADMUX", "RESERV", "DIDR0", "DIDR1", "TCCR1A", "TCCR1B", "TCCR1C", "RESERV", "TCNT1L", "TCNT1H", "ICR1L", "ICR1H", "OCR1AL", "OCR1AH", "OCR1BL", "OCR1BH", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "TCCR2A", "TCCR2B", "TCNT2", "OCR2A", "OCR2B", "RESERV", "ASSR", "RESERV", "TWBR", "TWSR", "TWAR", "TWDR", "TWCR", "TWAMR", "RESERV", "RESERV", "UCSR0A", "UCSR0B", "UCSR0C", "RESERV", "UBRR0L", "UBRR0H", "UDR0", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV", "RESERV"};
+LabelLinkedList Instruction::codeLabels = LabelLinkedList();
+
+void LabelNode::print(char* printedText)
+{
+	sprintf_s(printedText, INSTRUCTION_MAX_LENGTH, "\n%s:\n", this->labelName);
+}
