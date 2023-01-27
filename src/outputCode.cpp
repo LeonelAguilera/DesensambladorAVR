@@ -54,7 +54,7 @@ const char* OutputCode::turnIntoString(const LabelLinkedList* codeLabels)
 	OutputCodeLine* currentLine = this->head;
 	size_t currentLabelIndex = 0;
 	while (currentLine != 0) {
-		if (currentLine->line >= label[currentLabelIndex].line) {
+		if (currentLine->line == label[currentLabelIndex].line) {
 			char label_text[INSTRUCTION_MAX_LENGTH];
 			label[currentLabelIndex].print(label_text);
 			strcat_s(outputString, numberOfChars * sizeof(char), label_text);
