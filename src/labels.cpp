@@ -175,7 +175,7 @@ LabelNode::LabelNode(word currentLine, word destinationLine, size_t numberOfUnna
 		strcpy_s(newName, MAX_LABEL_NAME_LENGTH, LabelLinkedList::interruptNames[currentLine / 2]);
 	}
 	else {
-		sprintf_s(newName, MAX_LABEL_NAME_LENGTH, "MARK_%d", (int)numberOfUnnamedLabels);
+		sprintf_s(newName, MAX_LABEL_NAME_LENGTH, "LABEL_%d", (int)numberOfUnnamedLabels);
 	}
 	this->init(newName, destinationLine);
 }
