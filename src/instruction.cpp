@@ -807,7 +807,7 @@ bool ThirtyTwoBitsInstruction::codeLine(DataLinkedList* OPCode, char* ASMCode) {
 		k |= OPCode->data;
 
 		char destinationLabelName[MAX_LABEL_NAME_LENGTH]{};
-		this->codeLabels.getLabelName(OPCode->line, k, destinationLabelName);
+		this->codeLabels.getLabelName(OPCode->line-1, k, destinationLabelName);
 
 		//sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s 0x%06X\n",OPCode->line-1, this->_mnemonic, k);
 		sprintf_s(ASMCode, INSTRUCTION_MAX_LENGTH, "0x%04X: %s %s\n", OPCode->line - 1, this->_mnemonic, destinationLabelName);

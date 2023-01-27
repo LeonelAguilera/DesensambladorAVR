@@ -23,12 +23,14 @@ License along with Desensamblador AVR. If not, see <https://www.gnu.org/licenses
 
 class OutputCodeLine {
 public:
+	size_t line;
 	char _codeLine[INSTRUCTION_MAX_LENGTH];
 	OutputCodeLine* next;
 
 public:
-	OutputCodeLine() : _codeLine(""), next(0) {};
-	OutputCodeLine(const char* codeLine) : next(0) {
+	OutputCodeLine() : line(0), _codeLine(""), next(0) {};
+	OutputCodeLine(const char* codeLine, size_t currentLine) : next(0) {
+		this->line = currentLine;
 		strncpy_s(this->_codeLine, INSTRUCTION_MAX_LENGTH, codeLine, INSTRUCTION_MAX_LENGTH);
 	}
 };
@@ -41,8 +43,8 @@ public:
 
 public:
 	OutputCode() : head(0), tail(0), numberOfLines(0) {};
-	void addLine(const char* codeLine);
-	const char* turnIntoString();
+	void addLine(const char* codeLine, size_t currentLine);
+	const char* turnIntoString(const LabelLinkedList* codeLabels);
 };
 
 #endif //__OUTPUTCODE_H__

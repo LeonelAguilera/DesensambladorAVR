@@ -36,7 +36,7 @@ public:
 public:
 	LabelNode() : labelName(0), line(0), next(0) {};
 	LabelNode(const char* name, word line);
-	LabelNode(word currentLine, word destinationLine, uint32_t* numberOfUnnamedLabels);
+	LabelNode(word currentLine, word destinationLine, size_t numberOfLabels);
 
 	LabelNode(const LabelNode& base);
 //#ifdef __INSTRUCTION_H__
@@ -53,14 +53,24 @@ public:
 	LabelNode* head;
 
 public:
-	LabelLinkedList() :tail(0), head(0), numberOfUnnamedLabels(0) {};
+	LabelLinkedList() :tail(0), head(0), numberOfLabels(0) {};
+	LabelLinkedList(const LabelLinkedList& base);
 	static const char interruptNames[NUMBER_OF_INTERRUPTIONS][MAX_LABEL_NAME_LENGTH];
 
 	void getLabelName(word currentLine, word destinationLine, char* labelName);
 	bool addNode(word currentLine, word destinationLine);
 	bool isDestinationAlreadyAdded(word destinationLine, char* destinationLabelName);
+	size_t getNumberOfLabels() const { return this->numberOfLabels; };
+
+	LabelNode* toArray();
+	LabelNode* getSortedArray();
+
+#ifdef _DEBUG
+	void testSortedArray();
+#endif // _DEBUG
+
 private:
-	uint32_t numberOfUnnamedLabels;
+	size_t numberOfLabels;
 };
 
 #endif // !__CODE_MARKS_H__

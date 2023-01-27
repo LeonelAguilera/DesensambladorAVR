@@ -18,7 +18,7 @@ License along with Desensamblador AVR. If not, see <https://www.gnu.org/licenses
 
 #include "outputCode.h"
 
-void OutputCode::addLine(const char* codeLine)
+void OutputCode::addLine(const char* codeLine, size_t currentLine)
 {
 	if (this->head == 0) {
 		this->head = (OutputCodeLine*)malloc(sizeof(OutputCodeLine));
@@ -26,7 +26,7 @@ void OutputCode::addLine(const char* codeLine)
 			perror("Error output code");
 			return;
 		}
-		*this->head = OutputCodeLine(codeLine);
+		*this->head = OutputCodeLine(codeLine, currentLine);
 		this->tail = this->head;
 	}
 	else {
@@ -35,21 +35,27 @@ void OutputCode::addLine(const char* codeLine)
 			perror("Error adding code line");
 			return;
 		}
-		*this->tail->next = OutputCodeLine(codeLine);
+		*this->tail->next = OutputCodeLine(codeLine, currentLine);
 		this->tail = this->tail->next;
 	}
 	this->numberOfLines++;
 }
 
-const char* OutputCode::turnIntoString()
+const char* OutputCode::turnIntoString(const LabelLinkedList* codeLabels)
 {
-	size_t numberOfChars = (this->numberOfLines)*INSTRUCTION_MAX_LENGTH;
+	size_t numberOfChars = (this->numberOfLines+codeLabels->getNumberOfLabels())*INSTRUCTION_MAX_LENGTH;
 	char* outputString = (char*)calloc(numberOfChars, sizeof(char));
 	if (outputString == nullptr) {
 		return nullptr;
 	}
 	OutputCodeLine* currentLine = this->head;
+	LabelNode* currentLabel = codeLabels->head;
 	while (currentLine != 0) {
+		if (currentLine->line >= currentLabel->line) {
+			char label[INSTRUCTION_MAX_LENGTH];
+			currentLabel->print(label);
+			strcat_s(outputString, numberOfChars * sizeof(char), label);
+		}
 		strcat_s(outputString, numberOfChars* sizeof(char), currentLine->_codeLine);
 		currentLine = currentLine->next;
 	}

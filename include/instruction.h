@@ -34,8 +34,9 @@ protected:
 	const char* _mnemonic;
 	const byte _man;
 	const static char memLocations[256][7];
-	static LabelLinkedList codeLabels;
 public:
+	static LabelLinkedList codeLabels;
+
 	Instruction(word OPcode, word mask, const char* mnemonic, byte man) :_OPcode(OPcode), _mask(mask), _mnemonic(mnemonic), _man(man) {};
 
 	virtual bool isThisInstruction(word OPcode);
