@@ -46,15 +46,21 @@ const char* OutputCode::turnIntoString(const LabelLinkedList* codeLabels)
 	size_t numberOfChars = (this->numberOfLines+codeLabels->getNumberOfLabels())*INSTRUCTION_MAX_LENGTH;
 	char* outputString = (char*)calloc(numberOfChars, sizeof(char));
 	if (outputString == nullptr) {
+		perror("Error turning label list into string");
 		return nullptr;
 	}
+	LabelNode* label = codeLabels->getSortedArray();
+
 	OutputCodeLine* currentLine = this->head;
-	LabelNode* currentLabel = codeLabels->head;
+	size_t currentLabelIndex = 0;
 	while (currentLine != 0) {
-		if (currentLine->line >= currentLabel->line) {
-			char label[INSTRUCTION_MAX_LENGTH];
-			currentLabel->print(label);
-			strcat_s(outputString, numberOfChars * sizeof(char), label);
+		if (currentLine->line >= label[currentLabelIndex].line) {
+			char label_text[INSTRUCTION_MAX_LENGTH];
+			label[currentLabelIndex].print(label_text);
+			strcat_s(outputString, numberOfChars * sizeof(char), label_text);
+			currentLabelIndex++;
+			if (currentLabelIndex >= codeLabels->getNumberOfLabels())
+				currentLabelIndex = 0;
 		}
 		strcat_s(outputString, numberOfChars* sizeof(char), currentLine->_codeLine);
 		currentLine = currentLine->next;

@@ -62,8 +62,8 @@ public:
 	bool isDestinationAlreadyAdded(word destinationLine, char* destinationLabelName);
 	size_t getNumberOfLabels() const { return this->numberOfLabels; };
 
-	LabelNode* toArray();
-	LabelNode* getSortedArray();
+	LabelNode* toArray() const ;
+	LabelNode* getSortedArray() const;
 
 #ifdef _DEBUG
 	void testSortedArray();

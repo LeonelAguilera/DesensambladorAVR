@@ -98,7 +98,7 @@ bool LabelLinkedList::isDestinationAlreadyAdded(word destinationLine, char* dest
 	return false;
 }
 
-LabelNode* LabelLinkedList::toArray()
+LabelNode* LabelLinkedList::toArray() const
 {
 	LabelNode* Array = (LabelNode*)calloc(this->numberOfLabels, sizeof(LabelNode));
 	if (Array == 0) {
@@ -115,7 +115,7 @@ LabelNode* LabelLinkedList::toArray()
 	return Array;
 }
 
-LabelNode* LabelLinkedList::getSortedArray()
+LabelNode* LabelLinkedList::getSortedArray() const
 {
 	LabelNode* sortedArray = this->toArray();
 	LabelNode* zerosStack = (LabelNode*)calloc(this->numberOfLabels, sizeof(LabelNode));
